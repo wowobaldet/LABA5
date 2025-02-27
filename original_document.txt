@@ -1,0 +1,4 @@
+Title: Report
+Author: Ivanov
+Content: This is an important document.
+Permissions: Read/Write
