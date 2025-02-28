@@ -24,7 +24,8 @@ public:
     virtual unique_ptr<Document> clone() const = 0;
 
     // Метод для записи документа в файл
-    virtual void saveToFile(const string& filename) const {
+    virtual void saveToFile() const {
+        string filename = title + ".txt";
         ofstream file(filename);
         if (!file.is_open()) {
             cerr << "Error: Could not open file '" << filename << "' for writing." << endl;
@@ -68,17 +69,31 @@ public:
     }
 
     // Метод для записи документа в файл (расширяем базовый метод)
-    void saveToFile(const string& filename) const override {
-        ofstream file(filename);
+    void saveToFile() const override {
+        string filename = title + ".txt";
+        ofstream file(title + ".txt");
         if (!file.is_open()) {
             cerr << "Error: Could not open file '" << filename << "' for writing." << endl;
             return;
         }
 
-        file << "Title: " << title << endl;
         file << "Author: " << author << endl;
         file << "Content: " << content << endl;
         file << "Permissions: " << permissions << endl; // Добавляем права доступа
+
+        if (permissions == "Read Only"){
+            string command = "";
+            command += "chmod 444 '" + title + ".txt'";
+            cout << command << endl;
+            system((command).c_str());
+        }
+
+        if (permissions == "Read/Write"){
+            string command = "";
+            command += "chmod 777 '" + title + ".txt'";
+            cout << command << endl;
+            system((command).c_str());
+        }
 
         file.close();
         cout << "Document with permissions saved to file: " << filename << endl;
@@ -98,14 +113,15 @@ public:
 // Функция для демонстрации работы паттерна Prototype
 void demonstratePrototype() {
     // Создаем оригинальный документ
-    unique_ptr<Document> original = make_unique<DocumentCopy>("Report", "Ivanov", "This is an important document.", "Read/Write");
+    unique_ptr<Document> original = make_unique<DocumentCopy>("Report", "Ivano", "This is an important document.", "Read/Write");
 
     cout << "Original Document:" << endl;
     original->displayInfo();
     dynamic_cast<DocumentCopy*>(original.get())->displayPermissions();
 
     // Сохраняем оригинальный документ в файл
-    original->saveToFile("original_document.txt");
+
+    original->saveToFile();
 
     // Создаем копию документа
     unique_ptr<Document> copy = dynamic_cast<DocumentCopy*>(original.get())->clone();
@@ -123,7 +139,7 @@ void demonstratePrototype() {
     dynamic_cast<DocumentCopy*>(copy.get())->displayPermissions();
 
     // Сохраняем измененную копию в файл
-    copy->saveToFile("copied_document.txt");
+    copy->saveToFile();
 }
 
 int main() {
